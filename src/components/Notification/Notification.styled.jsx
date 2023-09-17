@@ -132,7 +132,7 @@ export const NotificationInner = styled.div`
     right: -0.2rem;
     top: -10px;
     font-size: 0.8rem;
-    padding: 0.5rem;
+    padding: 0.3rem;
     cursor: pointer;
     display: flex;
   }
