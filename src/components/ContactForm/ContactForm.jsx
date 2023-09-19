@@ -1,105 +1,155 @@
-import { nanoid } from 'nanoid';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addContact } from 'redux/contactsSlice';
+import { nanoid } from 'nanoid';
+import { addContact } from 'redux/operations';
 import { showNotification, hideNotification } from 'redux/notificationSlice';
-import {Notification } from './../Notification/Notification';
-import { getContactList, getNotification } from 'redux/selectors.js';
+import { selectContacts, selectNotification } from 'redux/selectors';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
+import { Notification } from './../Notification/Notification';
+import {PatternFormat} from 'react-number-format'; 
+
 import {
   StyledForm,
   StyledLabel,
   StyledInput,
   StyledErrorMessage,
   StyledSubmitButton,
+  StyledNotificationContent,
 } from './ContactForm.styled';
 
-const initialValues = { name: '', number: '' };
+
 
 const ContactsValidation = Yup.object().shape({
   name: Yup.string().required('* Name is required'),
   number: Yup.string()
-    .min(6, 'Number must be at least 6 characters')
-    .max(10, 'Number must be at most 10 characters')
-    .required('* Number is required'),
+  .matches(/^\+38 \(0[0-9]{2}\) [0-9]{3}-[0-9]{2}-[0-9]{2}$/, 'Invalid phone number format')
 });
-
+const initialValues = { name: '', number: '' };
 export const ContactForm = () => {
-  const contacts = useSelector(getContactList);
-  const notifications = useSelector(getNotification);
+  const contacts = useSelector(selectContacts);
+  const notifications = useSelector(selectNotification);
   const dispatch = useDispatch();
 
   const handleSubmit = (values, { resetForm }) => {
-    if (contacts.find(contact => contact.name === values.name)) {
-      dispatch(showNotification({ 
-        id: nanoid(), 
-        title: 'Error',
-        type: 'error', 
-        content: `${values.name} is already in contacts` }));
+    const formattedName = values.name.charAt(0).toUpperCase() + values.name.slice(1);
+    const formattedNumber = values.number;
+    const existingContactByName = contacts.find(contact => contact.name === formattedName);
+    const existingContactByNumber = contacts.find(contact => contact.phone === formattedNumber);
+
+    if (existingContactByName) {
+      dispatch(
+        showNotification({
+          id: nanoid(),
+          title: 'Error',
+          type: 'error',
+          content: (
+            <StyledNotificationContent>
+              Name <span>{formattedName}</span> is already in contacts
+            </StyledNotificationContent>
+          ),
+        })
+      );
       return;
     }
 
-    if (contacts.find(contact => contact.number === values.number)) {
-      dispatch(showNotification({
-        id: nanoid(), 
-        title: 'Error',
-        type: 'error', 
-        content: `${values.number} is already in contacts` }));
+    if (existingContactByNumber) {
+      dispatch(
+        showNotification({
+          id: nanoid(),
+          title: 'Error',
+          type: 'error',
+          content: (
+            <StyledNotificationContent>
+              Number <span>{formattedNumber}</span> is already in contacts
+            </StyledNotificationContent>
+          ),
+        })
+      );
       return;
     }
 
-    dispatch(addContact({ ...values, id: nanoid() }));
+    dispatch(
+      addContact({ name: formattedName, phone: formattedNumber, id: nanoid() })
+    );
 
-    
-    dispatch(showNotification({
-      id: nanoid(), 
-      title: 'Success',
-      type: 'success',
-      content: 'Contact added successfully'
-    }));
+    resetForm();
+
+    dispatch(
+      showNotification({
+        id: nanoid(),
+        title: 'Success',
+        type: 'success',
+        content: (
+          <StyledNotificationContent>
+            Contact <span>{formattedName}</span> added successfully
+          </StyledNotificationContent>
+        ),
+      })
+    );
 
     setTimeout(() => {
       dispatch(hideNotification());
     }, 5000);
-
-    
   };
-  const handleHideNotification = (id) => {
-      dispatch(hideNotification(id));
-    };
+
+  const handleHideNotification = id => {
+    dispatch(hideNotification(id));
+  };
 
   return (
     <>
-     {notifications && notifications.map((notification, index) => (
-  <Notification
-    key={`${notification.id}-${index}`}
-    id={notification.id}
-    type={notification.type}
-    title={notification.title}
-    content={notification.content}
-    onHide={handleHideNotification}
-  />
-))}
+      {notifications &&
+        notifications.map((notification, index) => (
+          <Notification
+            key={`${notification.id}-${index}`}
+            id={notification.id}
+            type={notification.type}
+            title={notification.title}
+            content={notification.content}
+            onHide={handleHideNotification}
+          />
+        ))}
 
       <Formik
         initialValues={initialValues}
         validationSchema={ContactsValidation}
         onSubmit={handleSubmit}
       >
-        {({ handleSubmit, isValid }) => (
+        {({ handleSubmit,  values, isValid,
+    
+    handleChange, 
+    handleBlur, }) => (
           <StyledForm onSubmit={handleSubmit}>
             <StyledLabel>
               Name
-              <StyledInput type="text" name="name" />
+              <StyledInput
+                type="text"
+                name="name"
+                value={values.name}
+                
+              />
               <StyledErrorMessage name="name" component="div" />
             </StyledLabel>
             <StyledLabel>
               Number
-              <StyledInput type="tel" name="number" />
+              <PatternFormat
+  format="+38 (0##) ###-##-##"
+  mask="_"
+  allowEmptyFormatting={true}
+  customInput={StyledInput}
+  type="tel"
+  name="number"
+  value={values.number}
+  onChange={handleChange}
+  onBlur={handleBlur}
+/>
               <StyledErrorMessage name="number" component="div" />
             </StyledLabel>
 
-            <StyledSubmitButton type="submit" disabled={!isValid}>Add contact</StyledSubmitButton>
+            <StyledSubmitButton type="submit" disabled={!isValid}>
+  Add contact
+</StyledSubmitButton>
           </StyledForm>
         )}
       </Formik>

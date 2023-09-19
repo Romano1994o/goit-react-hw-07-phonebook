@@ -1,30 +1,39 @@
+import React from 'react';
 import { nanoid } from 'nanoid';
 import { useDispatch, useSelector } from 'react-redux';
-import { getContactList, getFilter } from 'redux/selectors';
-import { deleteContact } from 'redux/contactsSlice';
-import { showNotification, hideNotification } from 'redux/notificationSlice'; 
+import { deleteContact } from 'redux/operations';
+import { selectIsLoading, selectFilteredContacts } from 'redux/selectors';
+import { showNotification, hideNotification } from 'redux/notificationSlice';
+import { FaPhone, FaTrash } from 'react-icons/fa';
 import {
   ContactListContainer,
   ContactItem,
+  ContactInfo,
   ContactName,
+  ContactPhone,
   DeleteButton,
+  CallButton,
+  StyledNotificationContent,
 } from './ContactList.styled';
 
+
 export const ContactList = () => {
-  const contacts = useSelector(getContactList);
-  const filter = useSelector(getFilter);
   const dispatch = useDispatch();
+  const isLoading = useSelector(selectIsLoading);
+  const contacts = useSelector(selectFilteredContacts);
 
   const handleDelete = (id, name) => {
     dispatch(deleteContact(id));
-
-    
     dispatch(
       showNotification({
-        id: nanoid(), 
-        title: 'Success',
-        type: 'success',
-        content: `${name} has been deleted successfully`,
+        id: nanoid(),
+        title: 'Error',
+        type: 'error',
+        content: (
+          <StyledNotificationContent>Contact 
+            {'  '}<span>{name}</span> has been deleted successfully
+          </StyledNotificationContent>
+        ),
       })
     );
     setTimeout(() => {
@@ -32,33 +41,39 @@ export const ContactList = () => {
     }, 5000);
   };
 
-  const filteredContacts = contacts.filter(contact =>
-    contact.name.toLowerCase().trim().includes(filter.toLowerCase().trim())
-  );
+  const handleCall = (phoneNumber) => {
+    window.open(`tel:${phoneNumber}`);
+  };
 
   return (
     <div>
-      {/* {filteredContacts.length === 0 && (
-        <h2>Please use the form above to add your first contact.</h2>
-      )} */}
-      {filteredContacts.length > 0 && (
-        <ul>
-          {filteredContacts.map(contact => (
-            <ContactListContainer key={contact.id}>
-              <ContactItem>
-                <ContactName>
-                  {contact.name}: {contact.number}
-                </ContactName>
-                <DeleteButton
-                  onClick={() => handleDelete(contact.id, contact.name)}
-                >
-                  Delete
-                </DeleteButton>
-              </ContactItem>
-            </ContactListContainer>
-          ))}
-        </ul>
-      )}
-    </div>
+  <ul>
+    {contacts.map((contact) => (
+      <ContactListContainer key={contact.id}>
+        <ContactItem>
+       <ContactInfo>
+       <CallButton onClick={() => handleCall(contact.phone)}>
+       <FaPhone />
+            </CallButton>
+            <ContactName>{contact.name}:</ContactName>
+            <DeleteButton
+              onClick={() => handleDelete(contact.id, contact.name)}
+              disabled={isLoading}
+            >
+               <FaTrash />
+            </DeleteButton>
+       </ContactInfo>
+
+            <ContactPhone>{contact.phone}</ContactPhone>
+         
+          
+            
+            
+          
+        </ContactItem>
+      </ContactListContainer>
+    ))}
+  </ul>
+</div>
   );
 };

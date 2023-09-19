@@ -4,20 +4,25 @@ import {
   FilterLabel,
   FilterInput,
 } from './Filter.styled';
-import {setFilter } from 'redux/filterSlice';
-import {getFilter } from 'redux/selectors';
+import { setFilter } from 'redux/filterSlice';
+import {selectFilter } from 'redux/selectors';
 
 export const Filter = () => {
+
   const dispatch = useDispatch();
 
-  const filter = useSelector(getFilter);
+  const filter = useSelector(selectFilter);
 
-  const handleChange = (event) => {
-    const { value } = event.target;
-
-    
-    dispatch(setFilter(value));
+  const updateFilter = payload => {
+    dispatch(setFilter(payload));
   };
+
+  const handleChange = event => {
+    updateFilter(event.target.value);
+  };
+
+  
+
 
   return (
     <FilterContainer>

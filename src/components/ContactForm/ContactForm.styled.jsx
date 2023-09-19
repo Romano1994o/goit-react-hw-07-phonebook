@@ -1,5 +1,6 @@
 import styled, { keyframes } from 'styled-components';
 import { Field, ErrorMessage } from 'formik';
+import InputMask from 'react-input-mask';
 
 const fadeIn = keyframes`
   from {
@@ -33,7 +34,17 @@ export const StyledLabel = styled.label`
   animation: ${slideIn} 0.5s ease;
 `;
 
+
+
 export const StyledInput = styled(Field)`
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+`;
+
+export const StyledInputMask = styled(InputMask)`
   width: 100%;
   padding: 8px;
   margin-top: 4px;
@@ -73,3 +84,11 @@ export const StyledSubmitButton = styled.button`
   }
 `;
 
+export const StyledNotificationContent = styled.span`
+  span {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: bold;
+    color: darkBlack;
+  }
+`;

@@ -7,6 +7,7 @@ const moveGradient = keyframes`
   }
 `;
 
+
 export const GradientBorder = styled.div`
   --border-width: 3px;
   position: relative;
@@ -122,7 +123,8 @@ export const NotificationInner = styled.div`
   p {
     margin-top: 0.5rem;
     font-size: 0.7rem;
-    
+
+  }
   }
 
   .close {
