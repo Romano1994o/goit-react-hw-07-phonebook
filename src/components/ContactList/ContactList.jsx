@@ -25,8 +25,8 @@ export const ContactList = () => {
     dispatch(
       showNotification({
         id: nanoid(),
-        title: 'Error',
-        type: 'error',
+        title: 'Success',
+        type: 'success',
         content: (
           <StyledNotificationContent>
             Contact <span>{name}</span> has been deleted successfully
