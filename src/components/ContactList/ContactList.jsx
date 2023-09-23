@@ -4,18 +4,16 @@ import { useDispatch, useSelector } from 'react-redux';
 import { deleteContact } from 'redux/operations';
 import { selectIsLoading, selectFilteredContacts } from 'redux/selectors';
 import { showNotification, hideNotification } from 'redux/notificationSlice';
-import { FaPhone, FaTrash } from 'react-icons/fa';
+import { FaTrash } from 'react-icons/fa';
 import {
   ContactListContainer,
-  ContactItem,
-  ContactInfo,
-  ContactName,
-  ContactPhone,
+  StyledTable,
+  TableHeader,
+  TableCell,
+  TableRow,
   DeleteButton,
-  CallButton,
   StyledNotificationContent,
 } from './ContactList.styled';
-
 
 export const ContactList = () => {
   const dispatch = useDispatch();
@@ -30,8 +28,8 @@ export const ContactList = () => {
         title: 'Error',
         type: 'error',
         content: (
-          <StyledNotificationContent>Contact 
-            {'  '}<span>{name}</span> has been deleted successfully
+          <StyledNotificationContent>
+            Contact <span>{name}</span> has been deleted successfully
           </StyledNotificationContent>
         ),
       })
@@ -41,39 +39,33 @@ export const ContactList = () => {
     }, 5000);
   };
 
-  const handleCall = (phoneNumber) => {
-    window.open(`tel:${phoneNumber}`);
-  };
-
   return (
-    <div>
-  <ul>
-    {contacts.map((contact) => (
-      <ContactListContainer key={contact.id}>
-        <ContactItem>
-       <ContactInfo>
-       <CallButton onClick={() => handleCall(contact.phone)}>
-       <FaPhone />
-            </CallButton>
-            <ContactName>{contact.name}:</ContactName>
-            <DeleteButton
-              onClick={() => handleDelete(contact.id, contact.name)}
-              disabled={isLoading}
-            >
-               <FaTrash />
-            </DeleteButton>
-       </ContactInfo>
-
-            <ContactPhone>{contact.phone}</ContactPhone>
-         
-          
-            
-            
-          
-        </ContactItem>
-      </ContactListContainer>
-    ))}
-  </ul>
-</div>
+    <ContactListContainer>
+      <StyledTable>
+        <thead>
+          <tr>
+            <TableHeader>Name</TableHeader>
+            <TableHeader>Phone</TableHeader>
+            <TableHeader>Action</TableHeader>
+          </tr>
+        </thead>
+        <tbody>
+          {contacts.map((contact) => (
+            <TableRow key={contact.id}>
+              <TableCell>{contact.name}</TableCell>
+              <TableCell>{contact.phone}</TableCell>
+              <TableCell>
+                <DeleteButton
+                  onClick={() => handleDelete(contact.id, contact.name)}
+                  disabled={isLoading}
+                >
+                  <FaTrash /> Delete
+                </DeleteButton>
+              </TableCell>
+            </TableRow>
+          ))}
+        </tbody>
+      </StyledTable>
+    </ContactListContainer>
   );
 };
